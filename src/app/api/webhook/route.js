@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { extractSocialUrl, scrapeLink, detectPlatform } from "@/services/scraperService";
 import { categorizeAndSummarize } from "@/services/aiService";
-import { saveLink } from "@/services/linkService";
+import { saveLink, findByUrl } from "@/services/linkService";
 
 const PLATFORM_LABELS = {
   instagram: "Instagram",
@@ -114,6 +114,14 @@ export async function POST(request) {
         const platformEmoji = PLATFORM_EMOJIS[platform] || "🔗";
         console.log(`[Webhook] ${label} link detected:`, url);
 
+        // Check for duplicates
+        const existing = await findByUrl(url);
+        if (existing) {
+            const savedDate = new Date(existing.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            const categoryEmoji = CATEGORY_EMOJIS[existing.category] || "🏷️";
+            return twimlResponse(`🔁 *Already in your Kortex!*\n\nYou saved this on *${savedDate}*.\n${categoryEmoji} *Category:* ${existing.category}\n📝 *Summary:* ${existing.summary}\n\n🔍 Check your dashboard to find it!`);
+        }
+
         // Reply to Twilio instantly, process in background
         processAndNotify(from, url, platform);
 
@@ -135,7 +143,7 @@ async function processAndNotify(from, url, platform) {
         }
         if (!captionForAi) captionForAi = url;
 
-        const aiResult = await categorizeAndSummarize(captionForAi, platform);
+        const aiResult = await categorizeAndSummarize(captionForAi, platform, url);
         console.log("[Webhook] AI result:", JSON.stringify(aiResult));
 
         await saveLink({

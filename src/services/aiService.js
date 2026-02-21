@@ -18,13 +18,14 @@ const PREDEFINED = [
   "Design", "Music", "Education", "Motivation", "Lifestyle",
 ];
 
-export async function categorizeAndSummarize(caption, platform = "article") {
+export async function categorizeAndSummarize(caption, platform = "article", url = "") {
     if (!caption || caption.trim() === "") {
         return { category: "Uncategorized", summary: "No content available." };
     }
 
     const platformContext = PLATFORM_CONTEXT[platform] || "a web page";
     const isUrlOnly = caption.startsWith("http") && !caption.includes(" ");
+    const urlContext = url ? `\n\nURL (use for extra context — subreddit, path, domain, etc.): "${url}"` : "";
 
     const summaryRules = `Write a SHORT 1-sentence summary (max 12 words). Rules:
 - Do NOT repeat or copy the title/caption. Rephrase it in your own words.
@@ -54,7 +55,7 @@ Respond ONLY in this exact JSON format (no markdown):
 {"category": "CategoryName", "summary": "One sentence summary."}`
         : `You are a content categorizer. I have content from ${platformContext}.
 
-Content: "${caption}"
+Content: "${caption}"${urlContext}
 
 Pick the best category. Prefer one from this list if it fits well:
 ${PREDEFINED.join(", ")}

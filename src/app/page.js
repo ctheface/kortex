@@ -41,7 +41,7 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="hero-subtitle"
           >
-            Stop losing valuable content in endless Instagram folders. Forward links to our WhatsApp bot, and let AI organize your personal library.
+            Stop losing valuable content in endless saves and bookmarks. Forward links from Instagram, X, Reddit, YouTube, and more — let AI organize your personal library.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

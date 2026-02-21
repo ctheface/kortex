@@ -80,13 +80,14 @@ function TwitterEmbed({ tweetId }) {
   const src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&dnt=true`;
 
   return (
-    <div className="embed-container">
+    <div className="embed-container" style={{ maxWidth: 550, margin: "0 auto" }}>
       {!loaded && <EmbedLoader />}
       <iframe
         src={src}
         style={{
           width: "100%",
-          height: 450,
+          minWidth: 350,
+          height: 350,
           border: "none",
           borderRadius: 8,
           display: loaded ? "block" : "none",

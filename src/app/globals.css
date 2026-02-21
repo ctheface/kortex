@@ -452,6 +452,48 @@ button {
   gap: 8px;
 }
 
+/* List View */
+.bento-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--accents-2);
+  border-radius: var(--radius);
+  background: var(--geist-background);
+  transition: all 0.15s ease;
+}
+
+.list-card:hover {
+  border-color: var(--accents-5);
+  background: var(--accents-1);
+}
+
+.list-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-content .bento-title {
+  -webkit-line-clamp: 1;
+  margin-bottom: 0;
+}
+
+.list-content .bento-desc {
+  display: none;
+}
+
+.list-content .bento-footer {
+  border-top: none;
+  padding-top: 6px;
+}
+
 .bento-action-btn {
   color: var(--accents-5);
   padding: 4px;
@@ -526,4 +568,118 @@ button {
   border: 1px dashed var(--accents-3);
   border-radius: var(--radius);
   margin-top: 40px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 12px;
+  }
+
+  .nav-links {
+    gap: 4px;
+  }
+
+  .nav-links .btn {
+    padding: 0 8px;
+    font-size: 0.75rem;
+    height: 34px;
+  }
+
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    position: relative;
+    top: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--accents-2);
+    padding: 12px 16px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .dashboard-sidebar.sidebar-collapsed {
+    width: 100%;
+    min-width: 100%;
+    padding: 8px 16px;
+    flex-direction: row;
+  }
+
+  .sidebar-toggle-btn {
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+
+  .sidebar-link {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .dashboard-main {
+    padding: 20px 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+  }
+
+  .bento-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hero-title {
+    font-size: 2rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem !important;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-window {
+    margin: 12px;
+    max-height: 85vh;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bento-content {
+    padding: 14px;
+  }
+
+  .bento-title {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.25rem;
+  }
+
+  .nav-logo {
+    font-size: 0.9rem;
+  }
 }

@@ -7,7 +7,9 @@ import {
   Database, Search, Trash2, ExternalLink, Inbox, 
   Sparkles, Code, Dumbbell, Coffee, Map, ShoppingBag, 
   Palette, Music, BookOpen, Heart, Layers, X,
-  Instagram, Globe, Linkedin, Youtube, SidebarOpen, SidebarClose
+  Instagram, Globe, Linkedin, Youtube, SidebarOpen, SidebarClose,
+  BarChart3, TrendingUp, Calendar, Link2, ChevronUp,
+  ArrowUpDown, LayoutGrid, List, Download
 } from "lucide-react";
 
 function XLogo({ size = 16 }) {
@@ -91,6 +93,127 @@ function CardImage({ link }) {
   );
 }
 
+function AnalyticsModal({ links, onClose }) {
+  const total = links.length;
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thisWeek = links.filter((l) => new Date(l.created_at) >= weekAgo).length;
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayCount = links.filter((l) => new Date(l.created_at) >= today).length;
+
+  const platformCounts = {};
+  const categoryCounts = {};
+  links.forEach((l) => {
+    const p = l.platform || "article";
+    platformCounts[p] = (platformCounts[p] || 0) + 1;
+    const c = l.category || "Uncategorized";
+    categoryCounts[c] = (categoryCounts[c] || 0) + 1;
+  });
+
+  const topCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0];
+  const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0];
+
+  const PLAT_LABELS = { instagram: "Instagram", twitter: "X / Twitter", reddit: "Reddit", youtube: "YouTube", linkedin: "LinkedIn", article: "Articles" };
+
+  const sortedPlatforms = Object.entries(platformCounts).sort((a, b) => b[1] - a[1]);
+  const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+  const maxPlatCount = sortedPlatforms[0]?.[1] || 1;
+  const maxCatCount = sortedCategories[0]?.[1] || 1;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        className="modal-window"
+        style={{ maxWidth: 560 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <BarChart3 size={20} />
+            <h2 style={{ fontSize: "1.15rem", fontWeight: 600 }}>Your Kortex Analytics</h2>
+          </div>
+          <button onClick={onClose} style={{ padding: 8, color: "var(--accents-5)", borderRadius: 6 }}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="modal-body" style={{ padding: "20px 24px 28px" }}>
+          {/* Stat Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 28 }}>
+            {[
+              { label: "Total Saved", value: total, icon: Link2, color: "var(--geist-foreground)" },
+              { label: "This Week", value: thisWeek, icon: TrendingUp, color: "#3b82f6" },
+              { label: "Today", value: todayCount, icon: Calendar, color: "#10b981" },
+              { label: "Categories", value: Object.keys(categoryCounts).length, icon: Layers, color: "#f59e0b" },
+            ].map((stat) => (
+              <div key={stat.label} style={{ background: "var(--accents-1)", borderRadius: 10, padding: "16px 12px", textAlign: "center", border: "1px solid var(--accents-2)" }}>
+                <stat.icon size={18} style={{ color: stat.color, marginBottom: 6 }} />
+                <div style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em" }}>{stat.value}</div>
+                <div style={{ fontSize: "0.7rem", color: "var(--accents-5)", fontWeight: 500, marginTop: 2 }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Top Highlights */}
+          {topCategory && topPlatform && (
+            <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
+              <div style={{ flex: 1, background: "var(--accents-1)", borderRadius: 10, padding: "14px 16px", border: "1px solid var(--accents-2)" }}>
+                <div style={{ fontSize: "0.7rem", color: "var(--accents-4)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Top Category</div>
+                <div style={{ fontSize: "1rem", fontWeight: 600 }}>{topCategory[0]} <span style={{ color: "var(--accents-4)", fontWeight: 400 }}>({topCategory[1]})</span></div>
+              </div>
+              <div style={{ flex: 1, background: "var(--accents-1)", borderRadius: 10, padding: "14px 16px", border: "1px solid var(--accents-2)" }}>
+                <div style={{ fontSize: "0.7rem", color: "var(--accents-4)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Top Source</div>
+                <div style={{ fontSize: "1rem", fontWeight: 600 }}>{PLAT_LABELS[topPlatform[0]] || topPlatform[0]} <span style={{ color: "var(--accents-4)", fontWeight: 400 }}>({topPlatform[1]})</span></div>
+              </div>
+            </div>
+          )}
+
+          {/* Platform Breakdown */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--accents-4)", textTransform: "uppercase", marginBottom: 10 }}>By Platform</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {sortedPlatforms.map(([p, count]) => (
+                <div key={p} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 500, width: 90, flexShrink: 0 }}>{PLAT_LABELS[p] || p}</span>
+                  <div style={{ flex: 1, height: 8, background: "var(--accents-2)", borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ width: `${(count / maxPlatCount) * 100}%`, height: "100%", background: "var(--geist-foreground)", borderRadius: 4, transition: "width 0.4s ease" }} />
+                  </div>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 600, width: 28, textAlign: "right" }}>{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Breakdown */}
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--accents-4)", textTransform: "uppercase", marginBottom: 10 }}>By Category</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {sortedCategories.slice(0, 8).map(([c, count]) => (
+                <div key={c} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 500, width: 90, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c}</span>
+                  <div style={{ flex: 1, height: 8, background: "var(--accents-2)", borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ width: `${(count / maxCatCount) * 100}%`, height: "100%", background: "var(--geist-foreground)", borderRadius: 4, transition: "width 0.4s ease" }} />
+                  </div>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 600, width: 28, textAlign: "right" }}>{count}</span>
+                </div>
+              ))}
+              {sortedCategories.length > 8 && (
+                <div style={{ fontSize: "0.75rem", color: "var(--accents-4)", textAlign: "center", marginTop: 4 }}>
+                  +{sortedCategories.length - 8} more categories
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 const CATEGORIES = [
   { name: "All", icon: Layers },
   { name: "Fitness", icon: Dumbbell },
@@ -123,6 +246,17 @@ export default function DashboardPage() {
   const [activePlatform, setActivePlatform] = useState("");
   const [spotlight, setSpotlight] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [viewMode, setViewMode] = useState("grid");
+
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 200);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Always show predefined categories, plus any new AI-generated ones from saved links
   const PREDEFINED_NAMES = ["Fitness", "Coding", "Food", "Travel", "Fashion", "Design", "Music", "Education", "Motivation", "Lifestyle"];
@@ -161,14 +295,63 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [search, activeCategory, activePlatform]);
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this save?")) return;
+  const sortedLinks = [...links].sort((a, b) => {
+    const da = new Date(a.created_at), db = new Date(b.created_at);
+    return sortOrder === "newest" ? db - da : da - db;
+  });
+
+  const exportLinks = (format) => {
+    if (links.length === 0) return;
+    let content, filename, mime;
+
+    if (format === "csv") {
+      const rows = [["Title", "Category", "Platform", "URL", "Date"]];
+      links.forEach((l) => {
+        rows.push([
+          `"${(l.summary || "").replace(/"/g, '""')}"`,
+          l.category || "",
+          l.platform || "",
+          l.url,
+          new Date(l.created_at).toLocaleDateString(),
+        ]);
+      });
+      content = rows.map((r) => r.join(",")).join("\n");
+      filename = "kortex-export.csv";
+      mime = "text/csv";
+    } else {
+      const lines = [`# Kortex Export\n`, `Exported on ${new Date().toLocaleDateString()}\n`];
+      links.forEach((l) => {
+        lines.push(`## ${l.summary || "Untitled"}\n`);
+        lines.push(`- **Category:** ${l.category || "Uncategorized"}`);
+        lines.push(`- **Platform:** ${l.platform || "article"}`);
+        lines.push(`- **URL:** ${l.url}`);
+        lines.push(`- **Date:** ${new Date(l.created_at).toLocaleDateString()}`);
+        if (l.caption) lines.push(`\n> ${l.caption.slice(0, 300)}`);
+        lines.push("\n---\n");
+      });
+      content = lines.join("\n");
+      filename = "kortex-export.md";
+      mime = "text/markdown";
+    }
+
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await fetch(`/api/links?id=${id}`, { method: "DELETE" });
-      setLinks((prev) => prev.filter((l) => l.id !== id));
+      await fetch(`/api/links?id=${deleteTarget}`, { method: "DELETE" });
+      setLinks((prev) => prev.filter((l) => l.id !== deleteTarget));
     } catch (err) {
       console.error("Delete error:", err);
     }
+    setDeleteTarget(null);
   };
 
   const handleRandom = () => {
@@ -186,6 +369,9 @@ export default function DashboardPage() {
             Kortex
           </Link>
           <div className="nav-links">
+            <button onClick={() => setShowAnalytics(true)} className="btn btn-secondary" style={{ border: "none", color: "var(--accents-5)" }}>
+              <BarChart3 size={16} /> Analytics
+            </button>
             <button onClick={handleRandom} className="btn btn-secondary" style={{ border: "none", color: "var(--accents-5)" }}>
               <Sparkles size={16} /> Random Pick
             </button>
@@ -265,6 +451,49 @@ export default function DashboardPage() {
             </div>
           </header>
 
+          {/* Sort / View / Export controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+            <button
+              onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+              className="btn btn-secondary"
+              style={{ height: 34, padding: "0 12px", fontSize: "0.8rem", border: "1px solid var(--accents-2)" }}
+            >
+              <ArrowUpDown size={14} /> {sortOrder === "newest" ? "Newest" : "Oldest"}
+            </button>
+
+            <div style={{ display: "flex", borderRadius: 8, border: "1px solid var(--accents-2)", overflow: "hidden" }}>
+              <button
+                onClick={() => setViewMode("grid")}
+                style={{ padding: "6px 10px", background: viewMode === "grid" ? "var(--accents-2)" : "transparent", border: "none", color: viewMode === "grid" ? "var(--geist-foreground)" : "var(--accents-4)", cursor: "pointer", display: "flex", alignItems: "center" }}
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                style={{ padding: "6px 10px", background: viewMode === "list" ? "var(--accents-2)" : "transparent", border: "none", color: viewMode === "list" ? "var(--geist-foreground)" : "var(--accents-4)", cursor: "pointer", display: "flex", alignItems: "center" }}
+              >
+                <List size={15} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1 }} />
+
+            <button
+              onClick={() => exportLinks("csv")}
+              className="btn btn-secondary"
+              style={{ height: 34, padding: "0 12px", fontSize: "0.8rem", border: "1px solid var(--accents-2)" }}
+            >
+              <Download size={14} /> CSV
+            </button>
+            <button
+              onClick={() => exportLinks("md")}
+              className="btn btn-secondary"
+              style={{ height: 34, padding: "0 12px", fontSize: "0.8rem", border: "1px solid var(--accents-2)" }}
+            >
+              <Download size={14} /> Markdown
+            </button>
+          </div>
+
           {loading ? (
             <div className="empty-state-modern" style={{ border: "none" }}>
               <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} style={{ display: "inline-block", marginBottom: 16 }}>
@@ -281,9 +510,9 @@ export default function DashboardPage() {
               </p>
             </div>
           ) : (
-            <div className="bento-grid">
+            <div className={viewMode === "grid" ? "bento-grid" : "bento-list"}>
               <AnimatePresence mode="popLayout">
-                {links.map((link) => (
+                {sortedLinks.map((link) => (
                   <motion.div
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -291,17 +520,17 @@ export default function DashboardPage() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     key={link.id}
-                    className="bento-card"
+                    className={viewMode === "grid" ? "bento-card" : "list-card"}
                     onClick={() => setSpotlight(link)}
                     style={{ cursor: "pointer" }}
                   >
-                    <CardImage link={link} />
-                    <div className="bento-content">
-                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                    {viewMode === "grid" && <CardImage link={link} />}
+                    <div className={viewMode === "grid" ? "bento-content" : "list-content"}>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: viewMode === "grid" ? 8 : 4 }}>
                         <span className="bento-category" style={{ margin: 0 }}>{link.category || "Uncategorized"}</span>
-                        {link.platform && link.platform !== "article" && (
+                        {link.platform && (
                           <span style={{ fontSize: "0.7rem", color: "var(--accents-4)", textTransform: "capitalize", fontWeight: 500 }}>
-                            · {link.platform === "twitter" ? "X" : link.platform}
+                            · {link.platform === "twitter" ? "X" : link.platform === "article" ? "Article" : link.platform}
                           </span>
                         )}
                       </div>
@@ -310,13 +539,13 @@ export default function DashboardPage() {
                       
                       <div className="bento-footer">
                         <span className="bento-date">
-                          {new Date(link.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          {new Date(link.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}{", "}{new Date(link.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                         </span>
                         <div className="bento-actions">
                           <a href={link.url} target="_blank" rel="noopener noreferrer" className="bento-action-btn" onClick={(e) => e.stopPropagation()}>
                             <ExternalLink size={16} />
                           </a>
-                          <button className="bento-action-btn danger" onClick={(e) => { e.stopPropagation(); handleDelete(link.id); }}>
+                          <button className="bento-action-btn danger" onClick={(e) => { e.stopPropagation(); setDeleteTarget(link.id); }}>
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -368,6 +597,75 @@ export default function DashboardPage() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Analytics Modal */}
+      <AnimatePresence>
+        {showAnalytics && <AnalyticsModal links={allLinks} onClose={() => setShowAnalytics(false)} />}
+      </AnimatePresence>
+
+      {/* Delete Confirmation */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="modal-window"
+              style={{ maxWidth: 400, textAlign: "center" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ padding: "32px 24px 24px" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(239,68,68,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                  <Trash2 size={22} color="#ef4444" />
+                </div>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: 8 }}>Delete this save?</h3>
+                <p style={{ fontSize: "0.85rem", color: "var(--accents-5)", lineHeight: 1.5 }}>This action cannot be undone.</p>
+                <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+                  <button onClick={() => setDeleteTarget(null)} className="btn btn-secondary" style={{ flex: 1, height: 40 }}>
+                    Cancel
+                  </button>
+                  <button onClick={confirmDelete} style={{ flex: 1, height: 40, borderRadius: 8, border: "none", background: "#ef4444", color: "#fff", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Scroll to top */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
+            style={{
+              position: "fixed",
+              right: 24,
+              bottom: 24,
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              border: "1px solid var(--accents-2)",
+              background: "var(--geist-background)",
+              color: "var(--geist-foreground)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              zIndex: 100,
+            }}
+            title="Scroll to top"
+          >
+            <ChevronUp size={20} />
+          </motion.button>
         )}
       </AnimatePresence>
     </>

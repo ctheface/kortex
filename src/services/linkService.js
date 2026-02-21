@@ -20,6 +20,17 @@ export async function saveLink({ url, platform = "article", caption, summary, ca
     return data;
 }
 
+export async function findByUrl(url) {
+    const { data, error } = await supabaseServer
+        .from("links")
+        .select("*")
+        .eq("url", url)
+        .limit(1);
+
+    if (error) return null;
+    return data?.[0] || null;
+}
+
 export async function getLinks({ search = "", category = "", platform = "" } = {}) {
     let query = supabaseServer
         .from("links")
