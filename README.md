@@ -14,6 +14,18 @@ Stop losing valuable content buried in endless saves and bookmarks. Kortex lets 
 
 ---
 
+## Screenshots
+
+### Landing Page
+![Landing Page](public/screenshots/landing-page.png)
+
+### Dashboard
+![Dashboard - Top](public/screenshots/dashboard-top.png)
+
+![Dashboard - Cards](public/screenshots/dashboard-bottom.png)
+
+---
+
 ## The Problem
 
 We all do it — you're scrolling through Instagram, you see a great workout routine, a design tip, or a coding hack. You hit "Save," but you never look at it again. It gets buried in a hidden folder, lost forever.
