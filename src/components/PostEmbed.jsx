@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, Globe } from "lucide-react";
 
 function getEmbedInfo(url, platform) {
   if (!url) return null;
@@ -154,32 +154,65 @@ function EmbedLoader() {
   );
 }
 
-export default function PostEmbed({ url, platform }) {
+function ArticlePreview({ url, thumbnail, summary }) {
+  const [imgError, setImgError] = useState(false);
+  let domain = "";
+  try { domain = new URL(url).hostname.replace("www.", ""); } catch {}
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+    >
+      <div className="embed-container" style={{ overflow: "hidden", cursor: "pointer", transition: "border-color 0.15s" }}>
+        {thumbnail && !imgError ? (
+          <div style={{ position: "relative" }}>
+            <img
+              src={thumbnail}
+              alt={summary || "Article"}
+              style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }}
+              onError={() => setImgError(true)}
+            />
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)",
+            }} />
+            <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <Globe size={12} color="rgba(255,255,255,0.7)" />
+                <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{domain}</span>
+              </div>
+              {summary && (
+                <p style={{ color: "#fff", fontSize: "0.95rem", fontWeight: 600, lineHeight: 1.3, margin: 0 }}>{summary}</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: "24px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: "var(--accents-2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Globe size={20} color="var(--accents-5)" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--accents-4)", marginBottom: 4 }}>{domain}</div>
+              <div style={{ fontSize: "0.9rem", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {summary || url}
+              </div>
+            </div>
+            <ExternalLink size={16} color="var(--accents-4)" style={{ flexShrink: 0 }} />
+          </div>
+        )}
+      </div>
+    </a>
+  );
+}
+
+export default function PostEmbed({ url, platform, thumbnail, summary }) {
   const embed = getEmbedInfo(url, platform);
 
   if (!embed) {
-    return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          padding: "16px 24px",
-          border: "1px solid var(--accents-2)",
-          borderRadius: 8,
-          color: "var(--accents-5)",
-          textDecoration: "none",
-          fontSize: "0.875rem",
-          transition: "border-color 0.15s",
-        }}
-      >
-        <ExternalLink size={16} /> Open in browser
-      </a>
-    );
+    return <ArticlePreview url={url} thumbnail={thumbnail} summary={summary} />;
   }
 
   switch (embed.type) {

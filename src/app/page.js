@@ -4,10 +4,12 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import { ArrowRight, Smartphone, BrainCircuit, Search, Database, MessageCircle, Zap, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
+import ParticlesBg from "@/components/ParticlesBg";
 
 export default function LandingPage() {
   return (
     <>
+      <ParticlesBg />
       <nav className="nav">
         <div className="container" style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
           <div className="nav-logo">

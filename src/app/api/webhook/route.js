@@ -105,7 +105,7 @@ export async function POST(request) {
 
         if (!url) {
             return twimlResponse(
-                "👋 Hey! Send me a link from Instagram, X, Reddit, LinkedIn, or any article — I'll save & organize it for you.\n\n📌 Supported:\n• 📸 Instagram posts & reels\n• 🐦 X / Twitter posts\n• 🤖 Reddit threads\n• 💼 LinkedIn articles\n• 📰 Any blog or article"
+                "👋 Hey! Send me a link from Instagram, X, Reddit, YouTube, LinkedIn, or any article — I'll save & organize it for you.\n\n📌 Supported:\n• 📸 Instagram posts & reels\n• 🐦 X / Twitter posts\n• 🤖 Reddit threads\n• 🎬 YouTube videos\n• 💼 LinkedIn articles\n• 📰 Any blog or article"
             );
         }
 

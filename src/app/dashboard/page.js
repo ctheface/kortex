@@ -582,7 +582,7 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="modal-body">
-                <PostEmbed url={spotlight.url} platform={spotlight.platform} />
+                <PostEmbed url={spotlight.url} platform={spotlight.platform} thumbnail={spotlight.thumbnail} summary={spotlight.summary} />
 
                 {spotlight.caption && (
                   <p style={{ color: "var(--accents-6)", lineHeight: 1.6, margin: "24px 0" }}>

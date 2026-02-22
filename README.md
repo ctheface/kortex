@@ -4,13 +4,13 @@
 
 **The Knowledge Base for your Social Saves.**
 
-Stop losing valuable content buried in endless Instagram folders, Twitter bookmarks, and Reddit saves. Kortex lets you forward any social media link to a WhatsApp bot, which uses AI to auto-categorize, summarize, and store it in a searchable personal dashboard.
+Stop losing valuable content buried in endless saves and bookmarks. Kortex lets you forward any social media link to a WhatsApp bot, which uses AI to auto-categorize, summarize, and store it in a searchable personal dashboard.
 
 ---
 
 ## Demo
 
-> **Screen Recording:** _[Link to be added]_
+> **Screen Recording:** [Watch the demo video](https://drive.google.com/file/d/1kBrfudUNL-nc_FcnMCp_w3AvjkQ6RUN2/view?usp=sharing)
 
 ---
 
@@ -36,19 +36,25 @@ Kortex fixes this. One WhatsApp message. AI does the rest.
 | X / Twitter | Supadata API → noembed → HTML meta tags | Native tweet embed |
 | Reddit | Reddit JSON API → HTML fallback | redditmedia embed |
 | YouTube | noembed → HTML meta tags | YouTube player embed |
-| LinkedIn | HTML meta tags (og:tags) | Link-out only |
-| Articles / Blogs | HTML meta tags (og:tags) | Link-out only |
+| LinkedIn | HTML meta tags (og:tags) | Rich article preview |
+| Articles / Blogs | HTML meta tags (og:tags) | Rich article preview |
 
 ## Features
 
 - **WhatsApp Bot Interface** — No app to download. Just text a link to the bot on WhatsApp.
 - **Multi-Platform Scraping** — Extracts captions, thumbnails, authors, and tags from Instagram, X, Reddit, YouTube, LinkedIn, and articles using a multi-strategy fallback system.
 - **AI Categorization & Summarization** — Google Gemini auto-tags content into categories (Fitness, Coding, Food, Travel, etc.) and writes concise headline-style summaries. If no predefined category fits, the AI invents a new one.
+- **Duplicate Detection** — If you send the same link twice, the bot tells you when you already saved it instead of creating duplicates.
 - **Searchable Dashboard** — Filter by platform, category, or free-text search. Cards show thumbnails, summaries, and platform badges.
-- **Embedded Previews** — Click a card to see the actual YouTube video, tweet, or Reddit post embedded inline (where supported).
+- **Embedded Previews** — Click a card to see the actual YouTube video, tweet, or Reddit post embedded inline. Articles show a rich link preview with thumbnail and domain.
+- **Sort & View Modes** — Toggle between Newest/Oldest sort order and Grid/List view.
+- **Analytics Dashboard** — A popup showing total saves, weekly stats, top categories, and platform breakdown with visual bar charts.
+- **Export** — Download your saved links as CSV or Markdown.
 - **Random Inspiration** — A "Random Pick" button surfaces a random saved link for rediscovery.
 - **Dark / Light Mode** — System-aware theme toggle with smooth transitions.
 - **Collapsible Sidebar** — Toggle the sidebar to give the card grid more space.
+- **Animated Particle Background** — Interactive floating dots on the landing page that react to mouse movement.
+- **Fully Responsive** — Mobile-first design with stacking cards, horizontal sidebar, and thumb-friendly buttons.
 - **Async Processing** — Bot replies instantly with "Processing...", then sends a follow-up WhatsApp message with the AI summary once done (avoids Twilio's 15s timeout).
 
 ## Tech Stack
@@ -68,23 +74,58 @@ Kortex fixes this. One WhatsApp message. AI does the rest.
 ## Architecture
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌──────────────┐
-│  WhatsApp    │────▶│  Twilio      │────▶│  /api/webhook│
-│  (User)      │◀────│  Sandbox     │     │  (Next.js)   │
-└─────────────┘     └──────────────┘     └──────┬───────┘
-                                                │
-                         ┌──────────────────────┼──────────────────────┐
-                         ▼                      ▼                      ▼
-                  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-                  │  Scraper     │     │  Gemini AI   │     │  Supabase    │
-                  │  Service     │     │  Categorize  │     │  Database    │
-                  │  (multi-     │     │  & Summarize │     │  (save link) │
-                  │  strategy)   │     └──────────────┘     └──────────────┘
-                  └──────────────┘
-                         │
-          ┌──────────────┼──────────────┬──────────────┐
-          ▼              ▼              ▼              ▼
-    Supadata API    noembed.com    Reddit JSON    HTML/og:tags
+                          ┌──────────────────────────────────────┐
+                          │         User's Phone (WhatsApp)      │
+                          └──────────────┬───────────────────────┘
+                                         │ sends link
+                                         ▼
+                          ┌──────────────────────────────────────┐
+                          │         Twilio WhatsApp Sandbox       │
+                          │     (receives message, triggers       │
+                          │      webhook POST to our server)      │
+                          └──────────────┬───────────────────────┘
+                                         │ POST /api/webhook
+                                         ▼
+                          ┌──────────────────────────────────────┐
+                          │              ngrok Tunnel              │
+                          │   (exposes localhost:3000 to the      │
+                          │    internet for Twilio to reach)      │
+                          └──────────────┬───────────────────────┘
+                                         │ forwards to localhost
+                                         ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                     Next.js App (localhost:3000)                           │
+│                                                                            │
+│  /api/webhook                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  1. Extract URL from message                                         │  │
+│  │  2. Check for duplicates ──────────▶ Supabase (lookup by URL)        │  │
+│  │  3. Scrape content ──────────────┐                                   │  │
+│  │  4. AI categorize + summarize    │                                   │  │
+│  │  5. Save to database             │                                   │  │
+│  │  6. Send follow-up via Twilio    │                                   │  │
+│  └──────────────────────────────────┼───────────────────────────────────┘  │
+│                                     │                                      │
+│         ┌───────────────────────────┼──────────────────┐                   │
+│         ▼                           ▼                  ▼                   │
+│  ┌─────────────┐   ┌──────────────────────┐   ┌──────────────┐            │
+│  │ Scraper     │   │     Gemini AI        │   │   Supabase   │            │
+│  │ Service     │   │  (categorize +       │   │  (PostgreSQL │            │
+│  │             │   │   summarize)         │   │   database)  │            │
+│  └──────┬──────┘   └──────────────────────┘   └──────────────┘            │
+│         │                                                                  │
+│    ┌────┼─────────┬───────────┬────────────┐                               │
+│    ▼    ▼         ▼           ▼            ▼                               │
+│ Supadata  noembed.com   Reddit JSON   HTML/og:tags                         │
+│   API                      API                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+                                         │
+                                         │ Twilio REST API
+                                         ▼
+                          ┌──────────────────────────────────────┐
+                          │     User receives follow-up message   │
+                          │   with category, summary, and emoji   │
+                          └──────────────────────────────────────┘
 ```
 
 ## Project Structure
@@ -96,18 +137,19 @@ src/
 │   │   ├── links/route.js        # GET/DELETE API for saved links
 │   │   └── webhook/route.js      # Twilio webhook — receives WhatsApp messages
 │   ├── dashboard/page.js         # Dashboard with filters, search, cards, embeds
-│   ├── globals.css               # Global styles, theme variables, component styles
+│   ├── globals.css               # Global styles, theme variables, responsive design
 │   ├── layout.js                 # Root layout with ThemeProvider
-│   └── page.js                   # Landing page
+│   └── page.js                   # Landing page with particle background
 ├── components/
-│   ├── PostEmbed.jsx             # Embedded previews (YouTube, X, Reddit, Instagram)
+│   ├── ParticlesBg.jsx           # Animated interactive particle canvas
+│   ├── PostEmbed.jsx             # Embedded previews (YouTube, X, Reddit, Instagram, articles)
 │   └── ThemeToggle.jsx           # Dark/light mode toggle
 ├── lib/
 │   ├── supabaseClient.js         # Supabase browser client
 │   └── supabaseServer.js         # Supabase server client
 └── services/
     ├── aiService.js              # Gemini AI categorization & summarization
-    ├── linkService.js            # Supabase CRUD operations for links
+    ├── linkService.js            # Supabase CRUD + duplicate detection
     └── scraperService.js         # Multi-strategy scraper for all platforms
 ```
 
@@ -165,7 +207,7 @@ SUPADATA_API_KEY=your_supadata_api_key
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/kortex.git
+git clone https://github.com/ctheface/kortex.git
 cd kortex
 npm install
 npm run dev
@@ -196,10 +238,14 @@ npm run dev
 
 1. **Send a link** — Forward any Instagram reel, YouTube video, tweet, Reddit post, or article URL to the WhatsApp bot
 2. **Get confirmation** — The bot instantly replies "Processing..." and then sends a follow-up with the AI-generated category and summary
-3. **Browse the dashboard** — Visit `localhost:3000/dashboard` to see all your saved content
-4. **Filter & search** — Use the sidebar to filter by platform or category, or use the search bar
-5. **View embeds** — Click any card to open the spotlight modal with an embedded preview
-6. **Random pick** — Click "Random Pick" in the nav to rediscover a random saved link
+3. **Duplicate check** — If you send the same link again, the bot tells you it's already saved with the date and category
+4. **Browse the dashboard** — Visit `localhost:3000/dashboard` to see all your saved content
+5. **Filter & search** — Use the sidebar to filter by platform or category, or use the search bar
+6. **Sort & switch views** — Toggle between Newest/Oldest and Grid/List view
+7. **View embeds** — Click any card to open the spotlight modal with an embedded preview
+8. **Analytics** — Click "Analytics" in the nav for stats on your saved content
+9. **Export** — Download your library as CSV or Markdown
+10. **Random pick** — Click "Random Pick" in the nav to rediscover a random saved link
 
 ---
 
