@@ -1,6 +1,6 @@
 # Kortex
 
-> Built for **[Hack the Thread](https://unstop.com/hackathons/hack-the-thread-180-degrees-consulting-nitk-surathkal-national-institute-of-technology-karnataka-surathkal-1468508)** — a hackathon by 180 Degrees Consulting, NITK Surathkal.
+> Built for **[Hack the Thread](https://unstop.com/hackathons/hack-the-thread-nitk-surathkal-1642360)** — a hackathon by 180 Degrees Consulting, NITK Surathkal.
 
 **The Knowledge Base for your Social Saves.**
 
